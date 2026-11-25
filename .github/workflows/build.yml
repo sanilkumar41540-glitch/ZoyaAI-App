@@ -3,11 +3,17 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: kivy/buildozer:latest
     steps:
     - uses: actions/checkout@v4
-    - run: echo y | buildozer -v android debug
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y python3-pip openjdk-17-jdk unzip git zip
+        pip3 install --user buildozer cython==0.29.36
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    - name: Build APK
+      run: |
+        buildozer -v android debug
     - uses: actions/upload-artifact@v4
       with:
         name: ZoyaAI-APK
