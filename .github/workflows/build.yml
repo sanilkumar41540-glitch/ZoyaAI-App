@@ -7,7 +7,7 @@ jobs:
       image: kivy/buildozer:latest
     steps:
     - uses: actions/checkout@v4
-    - run: buildozer -v android debug
+    - run: echo y | buildozer -v android debug
     - uses: actions/upload-artifact@v4
       with:
         name: ZoyaAI-APK
