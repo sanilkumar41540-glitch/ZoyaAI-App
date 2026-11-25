@@ -3,39 +3,19 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: kivy/buildozer:latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
     - run: |
-        sudo apt update
-        sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses-dev cmake libffi-dev libssl-dev aidl
-        pip install --upgrade buildozer cython==0.29.36
         if [ ! -f buildozer.spec ]; then buildozer init; fi
         sed -i 's/^title = .*/title = ZoyaAI/' buildozer.spec
         sed -i 's/^package.name = .*/package.name = zoyaai/' buildozer.spec
         sed -i 's/^package.domain = .*/package.domain = org.zoyaai/' buildozer.spec
         sed -i 's/^source.include_exts = .*/source.include_exts = py,png,jpg,kv,atlas/' buildozer.spec
         sed -i 's/^requirements = .*/requirements = python3,kivy/' buildozer.spec
-        echo "android.accept_sdk_license = True" >> buildozer.spec
         echo "android.api = 33" >> buildozer.spec
         echo "android.minapi = 21" >> buildozer.spec
-        echo "android.sdk = 33" >> buildozer.spec
-        echo "android.ndk = 25b" >> buildozer.spec
-        echo "android.build_tools = 33.0.2" >> buildozer.spec
-        # 1st try - sirf SDK download karne ke liye, fail bhi hua to chalega
-        buildozer -v android debug || true
-        # Ab License accept karo
-        SDK=$HOME/.buildozer/android/platform/android-sdk
-        mkdir -p $SDK/licenses
-        echo "8933bad161af4178b1185d1a37fbf41ea5269c" > $SDK/licenses/android-sdk-license
-        echo "d56f5187479451eabf01fb78af6dfcb131a563" >> $SDK/licenses/android-sdk-license
-        echo "24333f8a63b6825a656882fa2f2492895e8e918" >> $SDK/licenses/android-sdk-license
-        echo "84831b9409646a918e30573bab4c9cdd" > $SDK/licenses/android-sdk-preview-license
-        ls $SDK/cmdline-tools/latest/bin/ || ls $SDK/cmdline-tools/*/bin/
-        yes | $SDK/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK --licenses || true
-        # 2nd try - ab asli build
         buildozer -v android debug
     - uses: actions/upload-artifact@v4
       with:
